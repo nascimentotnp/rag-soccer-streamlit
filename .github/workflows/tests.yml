@@ -3,6 +3,7 @@ name: tests
 on:
   push:
   pull_request:
+  workflow_dispatch:   # botão "Run workflow" na aba Actions (ex.: depois de atualizar só o RAG)
 
 jobs:
   pytest:
@@ -19,6 +20,9 @@ jobs:
           # Crie um token (fine-grained, Contents: read só no LangChainadvancedRAG) e salve
           # como secret RAG_REPO_TOKEN. Se o RAG for público, o secret é dispensável.
           token: ${{ secrets.RAG_REPO_TOKEN || github.token }}
+
+      - name: Qual versão do RAG foi baixada
+        run: git -C LangChainadvancedRAG log -1 --format="RAG em %h (%ci) - %s"
 
       - uses: actions/setup-python@v5
         with:
