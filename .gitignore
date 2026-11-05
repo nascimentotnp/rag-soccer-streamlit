@@ -6,3 +6,6 @@ __pycache__/
 .streamlit/secrets.toml
 .idea/
 .vscode/
+
+# conversas salvas: contêm perguntas de usuários (privacidade)
+dados/

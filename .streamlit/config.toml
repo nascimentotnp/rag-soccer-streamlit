@@ -1,5 +1,9 @@
 [theme]
-primaryColor = "#1f8a4c"   # verde gramado
+base = "dark"
+primaryColor = "#22c55e"            # verde gramado
+backgroundColor = "#0b1120"
+secondaryBackgroundColor = "#111827"
+textColor = "#e5e7eb"
 
 [server]
 headless = true            # não tenta abrir o navegador sozinho (útil em servidor)

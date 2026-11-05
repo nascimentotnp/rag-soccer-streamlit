@@ -12,13 +12,16 @@ from rag_ui import servico
 
 st.set_page_config(page_title="Avaliação do RAG", page_icon="📊", layout="wide")
 st.title("📊 Como este RAG foi avaliado")
-st.caption("Gabarito com 15 perguntas (diretas, com gíria e fora do escopo). "
+st.caption("Gabarito com 24 perguntas (diretas, com gíria e fora do escopo). "
            "Hit@4 = o trecho certo está entre os 4 primeiros; MRR = quão perto do topo ele está.")
 
 RELATORIOS = {
-    "Reranking: antes × depois": ("rerank_ab.md", "rag avaliar --ab-rerank"),
+    "Respostas (LLM-juiz)": ("juiz.md", "rag avaliar --juiz"),
+    "Segurança": ("seguranca.md", "rag avaliar --seguranca"),
+    "Busca (com IC 95%)": ("resultados.md", "rag avaliar -t none"),
+    "Várias rodadas": ("rodadas.md", "rag avaliar --rodadas 3 -t none hyde"),
     "Recuperação adaptativa": ("roteamento.md", "rag avaliar --roteamento"),
-    "Técnicas de busca": ("resultados.md", "rag avaliar"),
+    "Reranking: antes × depois": ("rerank_ab.md", "rag avaliar --ab-rerank"),
 }
 
 pasta = servico.pasta_de_relatorios()

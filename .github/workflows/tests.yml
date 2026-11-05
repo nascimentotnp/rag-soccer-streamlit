@@ -15,6 +15,10 @@ jobs:
         with:
           repository: nascimentotnp/LangChainadvancedRAG
           path: LangChainadvancedRAG
+          # repositório do RAG PRIVADO: o token padrão só enxerga ESTE repositório.
+          # Crie um token (fine-grained, Contents: read só no LangChainadvancedRAG) e salve
+          # como secret RAG_REPO_TOKEN. Se o RAG for público, o secret é dispensável.
+          token: ${{ secrets.RAG_REPO_TOKEN || github.token }}
 
       - uses: actions/setup-python@v5
         with:

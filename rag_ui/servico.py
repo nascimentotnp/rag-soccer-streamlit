@@ -7,10 +7,18 @@ Por que um arquivo só para isso:
 - se o RAG mudar de API, só este arquivo muda;
 - os testes trocam `obter_pipeline` por um pipeline falso (sem modelos, sem internet).
 
+O que mora aqui:
+- cache dos modelos (@st.cache_resource): carregados 1 vez por servidor, compartilhados entre usuários;
+- perguntar_stream(): a resposta em pedaços (streaming), para aparecer sendo escrita;
+- historico_da_conversa(): converte o chat da tela em [(pergunta, resposta)] para a memória do RAG;
+- registrar_feedback(): 👍/👎 vão para o RAG e viram candidatas ao gabarito;
+- mensagem_de_erro(): erros do provedor viram texto amigável (sem expor detalhes internos).
+
 ⬅️ Passo anterior: app.py (a tela de chat)
-➡️ Próximo passo: rag_ui/componentes.py (como a resposta é desenhada)
+➡️ Próximo passo: rag_ui/historico.py (as conversas salvas, que não somem ao recarregar)
 """
 import os
+from collections.abc import Iterator
 from dataclasses import replace
 from pathlib import Path
 
@@ -63,22 +71,56 @@ def obter_pipeline(rerank: bool) -> RAGPipeline:
     base = _pipeline_base()
     if rerank:
         return base
-    # embeddings são o componente pesado (PyTorch): compartilha. O cliente do LLM é leve: cria outro.
-    return RAGPipeline(replace(base.cfg, rerank=False), embeddings=base.embeddings)
+    return base.variant(rerank=False)  # reaproveita os modelos e o índice já carregados
 
 
-def perguntar(pergunta: str, tecnica: str, rerank: bool) -> Answer:
+def historico_da_conversa(mensagens: list[dict]) -> list[tuple[str, str]]:
+    """Converte o chat da tela em [(pergunta, resposta), ...] para a memória do RAG.
+
+    Só entram trocas completas: mensagens de erro (sem "resposta") ficam de fora.
+    """
+    turnos, pergunta = [], None
+    for m in mensagens:
+        if m["papel"] == "user":
+            pergunta = m["texto"]
+        elif pergunta is not None and "resposta" in m:
+            turnos.append((pergunta, m["texto"]))
+            pergunta = None
+    return turnos
+
+
+def perguntar(pergunta: str, tecnica: str, rerank: bool,
+              historico: list[tuple[str, str]] | None = None) -> Answer:
     if tecnica == ADAPTIVE:
         rerank = True  # a rota adaptativa usa a nota do reranker
-    return obter_pipeline(rerank).ask(pergunta, tecnica)
+    return obter_pipeline(rerank).ask(pergunta, tecnica, history=historico)
+
+
+def perguntar_stream(pergunta: str, tecnica: str, rerank: bool,
+                     historico: list[tuple[str, str]] | None = None) -> tuple[Answer, Iterator[str]]:
+    """Streaming: (metadados já prontos - fontes, rota, rastro da busca -, pedaços do texto).
+
+    É o que dá a "cara de IA": a resposta aparece sendo escrita, em vez de surgir de uma vez
+    depois de alguns segundos de tela parada.
+    """
+    if tecnica == ADAPTIVE:
+        rerank = True
+    return obter_pipeline(rerank).ask_stream(pergunta, tecnica, history=historico)
+
+
+def registrar_feedback(resposta: Answer, util: bool, comentario: str = "") -> None:
+    """👍/👎 vão para o RAG (data/feedback/feedback.jsonl): os 👎 viram candidatas ao gabarito."""
+    obter_pipeline(True).record_feedback(resposta, useful=util, comment=comentario)
 
 
 def nivel_de_confianca(nota: float | None) -> tuple[str, str]:
-    """Traduz a nota do reranker para o usuário, com os MESMOS limites da rota adaptativa."""
+    """Traduz a nota do reranker para o usuário, alinhada aos limites da rota adaptativa."""
     if nota is None:
         return "—", "gray"
-    if nota >= settings.adaptive_uncertain_below:
+    if nota >= 0:
         return "alta", "green"
+    if nota >= settings.adaptive_uncertain_below:
+        return "média", "blue"
     if nota >= settings.adaptive_out_of_scope_below:
         return "baixa", "orange"
     return "muito baixa", "red"
