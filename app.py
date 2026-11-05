@@ -1,16 +1,3 @@
-"""TELA DE CHAT - ponto de entrada:  streamlit run app.py
-
-Como o Streamlit funciona (o conceito mais importante para ler este arquivo):
-o script RODA DE NOVO, de cima a baixo, a cada interação (clique, mensagem enviada...).
-Por isso:
-  - o histórico do chat fica em st.session_state (sobrevive às re-execuções, 1 por usuário);
-  - os modelos ficam em @st.cache_resource no servico.py (carregados 1 vez por servidor).
-
-Cada pergunta é independente: o RAG ainda não tem memória de conversa (próximo desafio).
-
-📖 Ordem de leitura: app.py -> rag_ui/servico.py -> rag_ui/componentes.py -> pages/1_Avaliacao.py
-➡️ Próximo passo: rag_ui/servico.py (a ponte com o RAG)
-"""
 import streamlit as st
 
 from rag_ui import componentes, servico
