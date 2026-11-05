@@ -1,0 +1,9 @@
+# Interface web (este repositório)
+streamlit>=1.40
+python-dotenv
+
+# O motor de RAG vem do OUTRO repositório, instalado como biblioteca.
+# Desenvolvimento local (as duas pastas lado a lado; mudanças no RAG aparecem na hora):
+-e ../LangChainadvancedRAG[groq]
+# Deploy / quem não tem a pasta ao lado: troque a linha acima por
+# rag[groq] @ git+https://github.com/nascimentotnp/LangChainadvancedRAG.git

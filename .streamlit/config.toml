@@ -1,0 +1,8 @@
+[theme]
+primaryColor = "#1f8a4c"   # verde gramado
+
+[server]
+headless = true            # não tenta abrir o navegador sozinho (útil em servidor)
+
+[browser]
+gatherUsageStats = false

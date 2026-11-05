@@ -1,0 +1,30 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # o motor de RAG vem do outro repositório, na "pasta ao lado" (como no desenvolvimento local)
+      - uses: actions/checkout@v4
+        with:
+          repository: nascimentotnp/LangChainadvancedRAG
+          path: LangChainadvancedRAG
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependências (PyTorch só CPU, bem menor)
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -e "./LangChainadvancedRAG[groq]" "streamlit>=1.40" python-dotenv pytest
+
+      - name: Testes (pipeline falso, sem chaves e sem internet para o LLM)
+        run: pytest -v
