@@ -9,10 +9,10 @@ jobs:
   pytest:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # o motor de RAG vem do outro repositório, na "pasta ao lado" (como no desenvolvimento local)
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           repository: nascimentotnp/LangChainadvancedRAG
           path: LangChainadvancedRAG
@@ -24,7 +24,7 @@ jobs:
       - name: Qual versão do RAG foi baixada
         run: git -C LangChainadvancedRAG log -1 --format="RAG em %h (%ci) - %s"
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
